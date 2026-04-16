@@ -1,0 +1,54 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes: ["mongo_data:/data/db"]
+    ports: ["27017:27017"]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports: ["6379:6379"]
+
+  api:
+    build:
+      context: ./backend
+    env_file: .env
+    environment:
+      ROLE: api
+    depends_on: [mongo, redis]
+    ports: ["4000:4000"]
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ROLE: worker
+      MONGO_URI: ${MONGO_URI}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      AUDIT_TIMEOUT_MS: ${AUDIT_TIMEOUT_MS:-45000}
+      MAX_CONCURRENT_AUDITS: ${MAX_CONCURRENT_AUDITS:-2}
+    depends_on: [mongo, redis]
+    restart: unless-stopped
+    # Puppeteer needs extra shared memory
+    shm_size: "1gb"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    depends_on: [api]
+    ports: ["3000:3000"]
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

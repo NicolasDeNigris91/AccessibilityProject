@@ -2,6 +2,8 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import { ColorBlindFilters } from "@/components/ColorBlindFilters";
+import { Shell } from "@/components/shell/Shell";
+import { AxeDev } from "@/components/AxeDev";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -37,8 +39,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-bg font-sans text-ink antialiased">
+        <AxeDev />
         <ColorBlindFilters />
-        {children}
+        <Shell>{children}</Shell>
       </body>
     </html>
   );
