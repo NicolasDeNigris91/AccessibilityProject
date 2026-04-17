@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Logo } from "@/components/ui/Logo";
+import { API_URL } from "@/lib/api";
 import { copy } from "@/lib/copy";
 
 const footerLinks = [
   { href: "https://github.com", label: copy.footer.links.github, external: true },
-  { href: "/api/docs", label: copy.footer.links.apiDocs, external: true },
+  { href: `${API_URL}/docs`, label: copy.footer.links.apiDocs, external: true },
   { href: "/aprender", label: copy.footer.links.learn, external: false },
 ];
 
