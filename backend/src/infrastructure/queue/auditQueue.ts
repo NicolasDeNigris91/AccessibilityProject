@@ -4,6 +4,9 @@ import { redisConnection } from "./connection";
 export interface AuditJobData {
   publicId: string;
   url: string;
+  // Propagated from the HTTP layer so worker logs and DB audit trails share a
+  // single correlation id with the request that enqueued the job.
+  requestId?: string;
 }
 
 export const AUDIT_QUEUE = "audits";

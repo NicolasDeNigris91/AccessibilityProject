@@ -11,6 +11,7 @@ import { AuditModel } from "@/infrastructure/db/AuditModel";
 import { redisConnection } from "@/infrastructure/queue/connection";
 import { auditsRouter } from "@/interfaces/http/routes/audits";
 import { errorHandler } from "@/interfaces/http/middlewares/errorHandler";
+import { requestId } from "@/interfaces/http/middlewares/requestId";
 import { mountSwagger } from "@/interfaces/http/swagger";
 
 async function main() {
@@ -37,7 +38,15 @@ async function main() {
     })
   );
   app.use(express.json({ limit: "32kb" }));
-  app.use(pinoHttp({ logger }));
+  app.use(requestId);
+  app.use(
+    pinoHttp({
+      logger,
+      // Have pino-http adopt the id our middleware assigned so every HTTP log
+      // line carries the same requestId the response header returns.
+      genReqId: (req) => (req as { requestId?: string }).requestId ?? "unknown",
+    })
+  );
 
   app.use(
     rateLimit({

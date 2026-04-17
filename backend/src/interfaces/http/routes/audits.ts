@@ -60,7 +60,11 @@ auditsRouter.post("/", requireClientId, async (req, res) => {
     url: parsed.data.url,
     status: "queued",
   });
-  await auditQueue.add("audit", { publicId, url: parsed.data.url }, { jobId: publicId });
+  await auditQueue.add(
+    "audit",
+    { publicId, url: parsed.data.url, requestId: req.requestId },
+    { jobId: publicId }
+  );
 
   res.status(202).json({ publicId, status: "queued" });
 });

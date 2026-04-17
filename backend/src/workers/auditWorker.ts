@@ -92,8 +92,14 @@ async function main() {
   const worker = new Worker<AuditJobData>(
     AUDIT_QUEUE,
     async (job) => {
-      const { publicId, url } = job.data;
-      logger.info({ publicId, url }, "audit job start");
+      const { publicId, url, requestId } = job.data;
+      // Every log line for this job inherits requestId and publicId so an ops
+      // search on either field returns the full HTTP-to-worker timeline.
+      const jobLogger = logger.child({
+        requestId: requestId ?? "unknown",
+        publicId,
+      });
+      jobLogger.info({ url }, "audit job start");
       await AuditModel.updateOne({ publicId }, { $set: { status: "running" } });
       try {
         const result = await runAudit(url);
@@ -101,14 +107,14 @@ async function main() {
           { publicId },
           { $set: { status: "done", ...result } }
         );
-        logger.info({ publicId, score: result.score }, "audit job done");
+        jobLogger.info({ score: result.score }, "audit job done");
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         await AuditModel.updateOne(
           { publicId },
           { $set: { status: "failed", error: message } }
         );
-        logger.error({ err, publicId }, "audit job failed");
+        jobLogger.error({ err }, "audit job failed");
         throw err;
       }
     },
