@@ -1,58 +1,140 @@
 "use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRef, type ReactNode } from "react";
 import useSWR from "swr";
+import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ReportHeader } from "@/components/report/ReportHeader";
 import { SeverityBreakdown } from "@/components/report/SeverityBreakdown";
 import { ViolationCard } from "@/components/report/ViolationCard";
-import { API_URL, apiFetch, fetcher } from "@/lib/api";
+import { ApiError, API_URL, apiFetch, fetcher } from "@/lib/api";
+import { deriveAuditState, pollingIntervalFor } from "@/lib/auditState";
 import { copy } from "@/lib/copy";
 import type { AuditDetail } from "@/lib/types";
 
 const SEVERITY_WEIGHT = { critical: 0, serious: 1, moderate: 2, minor: 3 } as const;
 
 export default function AuditDetailPage({ params }: { params: { id: string } }) {
-  const { data, mutate } = useSWR<AuditDetail>(
+  const router = useRouter();
+  const reauditInFlight = useRef(false);
+
+  const { data, error, isLoading, mutate } = useSWR<AuditDetail>(
     `${API_URL}/api/audits/${params.id}`,
     fetcher,
-    { refreshInterval: 3000 }
+    {
+      refreshInterval: pollingIntervalFor,
+      shouldRetryOnError: false,
+    }
   );
 
-  if (!data) {
-    return (
-      <section className="py-24">
-        <Container>
-          <p className="text-muted">{copy.dashboard.statusProcessing}…</p>
-        </Container>
-      </section>
-    );
+  const state = deriveAuditState(data, error, isLoading);
+  const s = copy.report.states;
+
+  async function reaudit(url: string) {
+    if (reauditInFlight.current) return;
+    reauditInFlight.current = true;
+    try {
+      const res = await apiFetch(`${API_URL}/api/audits`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new ApiError(res.status);
+      const { publicId } = (await res.json()) as { publicId: string };
+      router.push(`/audits/${publicId}`);
+    } catch (err) {
+      reauditInFlight.current = false;
+      console.error("reaudit failed", err);
+    }
   }
 
-  if (data.status !== "done") {
-    return (
-      <section className="py-24">
-        <Container className="flex flex-col gap-3">
-          <h1 className="font-serif text-3xl text-ink">{data.url}</h1>
-          <p className="text-muted">
-            {copy.dashboard.tableStatus}: {data.status}
-          </p>
-        </Container>
-      </section>
-    );
-  }
+  switch (state.kind) {
+    case "loading":
+      return <StatusShell title={s.loading} />;
 
-  async function reaudit() {
-    await apiFetch(`${API_URL}/api/audits`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ url: data!.url }),
-    });
-    mutate();
-  }
+    case "not-found":
+      return (
+        <StatusShell
+          title={s.notFound}
+          hint={s.notFoundHint}
+          action={
+            <Link href="/app">
+              <Button>{s.newAudit}</Button>
+            </Link>
+          }
+        />
+      );
 
+    case "error":
+      return (
+        <StatusShell
+          title={s.error}
+          hint={s.errorHint}
+          action={<Button onClick={() => mutate()}>{s.retry}</Button>}
+        />
+      );
+
+    case "queued":
+      return <StatusShell title={s.queued} hint={s.queuedHint} url={state.data.url} />;
+
+    case "running":
+      return <StatusShell title={s.running} hint={s.runningHint} url={state.data.url} />;
+
+    case "failed":
+      return (
+        <StatusShell
+          title={s.failed}
+          hint={s.failedHint}
+          url={state.data.url}
+          action={
+            <Button onClick={() => reaudit(state.data.url)}>{s.retry}</Button>
+          }
+        />
+      );
+
+    case "done":
+      return (
+        <ReportView
+          data={state.data}
+          onReaudit={() => reaudit(state.data.url)}
+        />
+      );
+  }
+}
+
+function StatusShell({
+  title,
+  hint,
+  url,
+  action,
+}: {
+  title: string;
+  hint?: string;
+  url?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <section className="py-24">
+      <Container className="flex flex-col items-start gap-4">
+        <h1 className="font-serif text-3xl text-ink md:text-4xl">{title}</h1>
+        {url && <p className="break-all font-mono text-sm text-muted">{url}</p>}
+        {hint && <p className="max-w-prose text-ink/80">{hint}</p>}
+        {action && <div className="mt-2">{action}</div>}
+      </Container>
+    </section>
+  );
+}
+
+function ReportView({
+  data,
+  onReaudit,
+}: {
+  data: AuditDetail;
+  onReaudit: () => void;
+}) {
   const totals = data.totals ?? { critical: 0, serious: 0, moderate: 0, minor: 0 };
-  const total =
-    totals.critical + totals.serious + totals.moderate + totals.minor;
-
+  const total = totals.critical + totals.serious + totals.moderate + totals.minor;
   const sorted = [...data.violations].sort(
     (a, b) => SEVERITY_WEIGHT[a.impact] - SEVERITY_WEIGHT[b.impact]
   );
@@ -64,7 +146,7 @@ export default function AuditDetailPage({ params }: { params: { id: string } }) 
           url={data.url}
           score={data.score ?? 0}
           createdAt={data.createdAt}
-          onReaudit={reaudit}
+          onReaudit={onReaudit}
         />
 
         <div className="flex flex-col gap-6">

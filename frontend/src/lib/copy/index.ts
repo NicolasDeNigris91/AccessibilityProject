@@ -61,6 +61,24 @@ export const copy = {
       critical > 0
         ? `${total} barreiras encontradas. ${critical} delas podem impedir completamente o uso por leitores de tela.`
         : `${total} barreiras encontradas.`,
+    states: {
+      loading: "Carregando relatório…",
+      queued: "Aguardando na fila",
+      queuedHint: "Vamos começar em instantes.",
+      running: "Auditando a página",
+      runningHint:
+        "Costuma levar cerca de 30 segundos. Pode deixar a aba aberta — atualizamos sozinhos.",
+      failed: "A auditoria falhou",
+      failedHint:
+        "Algo deu errado ao processar esta URL. Você pode tentar novamente.",
+      notFound: "Relatório não encontrado",
+      notFoundHint:
+        "Este link pode estar expirado ou incorreto. Que tal iniciar uma nova auditoria?",
+      error: "Não foi possível carregar este relatório",
+      errorHint: "A conexão pode ter falhado. Tente novamente.",
+      retry: "Tentar novamente",
+      newAudit: "Nova auditoria",
+    },
   },
   severity: {
     critical: {
