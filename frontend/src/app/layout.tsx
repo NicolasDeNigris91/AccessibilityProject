@@ -26,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Euthus — Acessibilidade, vista com clareza",
+  title: "Euthus. Acessibilidade, vista com clareza.",
   description:
     "Ferramenta de auditoria de acessibilidade web que explica, não só aponta. Construída com axe-core.",
 };

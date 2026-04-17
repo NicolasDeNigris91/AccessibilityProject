@@ -4,7 +4,7 @@ import { copy } from "@/lib/copy";
 const sections = [
   {
     title: "O que é acessibilidade web",
-    body: "Acessibilidade é construir a web para todas as pessoas — incluindo quem usa leitor de tela, navega só pelo teclado, tem baixa visão, daltonismo, ou dificuldades motoras e cognitivas. Um site acessível funciona com qualquer corpo e qualquer tecnologia.",
+    body: "Acessibilidade é construir a web para todas as pessoas, incluindo quem usa leitor de tela, navega só pelo teclado, tem baixa visão, daltonismo, ou dificuldades motoras e cognitivas. Um site acessível funciona com qualquer corpo e qualquer tecnologia.",
   },
   {
     title: "WCAG 2.1 em 4 princípios",
@@ -16,11 +16,11 @@ const sections = [
   },
   {
     title: "Severidades",
-    body: "Crítica impede o uso por tecnologias assistivas; Séria dificulta muito; Moderada causa atrito; Leve tem impacto pequeno mas ainda é barreira. Priorize críticas — elas fecham a porta inteira.",
+    body: "Crítica impede o uso por tecnologias assistivas; Séria dificulta muito; Moderada causa atrito; Leve tem impacto pequeno mas ainda é barreira. Priorize as críticas: elas fecham a porta inteira.",
   },
   {
     title: "Limitações de auditoria automática",
-    body: "Axe-core detecta cerca de 30–40% dos problemas de acessibilidade. O restante exige teste humano com leitor de tela, navegação por teclado e revisão de conteúdo. Use o Euthus como linha de base, não como selo final.",
+    body: "Axe-core detecta cerca de 30 a 40% dos problemas de acessibilidade. O restante exige teste humano com leitor de tela, navegação por teclado e revisão de conteúdo. Use o Euthus como linha de base, não como selo final.",
   },
 ];
 

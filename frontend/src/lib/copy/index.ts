@@ -36,7 +36,7 @@ export const copy = {
     lead: "Envie uma URL e receba um relatório completo em cerca de 30 segundos.",
     submitPlaceholder: "https://exemplo.com",
     submitButton: "Auditar",
-    submitHint: "Leva ~30s. Você pode fechar a aba — o relatório fica salvo.",
+    submitHint: "Leva ~30s. Você pode fechar a aba, o relatório fica salvo.",
     empty: "Nenhuma auditoria ainda. Envie uma URL acima pra começar.",
     tableUrl: "URL",
     tableStatus: "Status",
@@ -67,7 +67,7 @@ export const copy = {
       queuedHint: "Vamos começar em instantes.",
       running: "Auditando a página",
       runningHint:
-        "Costuma levar cerca de 30 segundos. Pode deixar a aba aberta — atualizamos sozinhos.",
+        "Costuma levar cerca de 30 segundos. Pode deixar a aba aberta. Atualizamos sozinhos.",
       failed: "A auditoria falhou",
       failedHint:
         "Algo deu errado ao processar esta URL. Você pode tentar novamente.",
