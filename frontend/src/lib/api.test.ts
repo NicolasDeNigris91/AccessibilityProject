@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { apiFetch, fetcher } from "./api";
+import { ApiError, apiFetch, fetcher } from "./api";
 
 describe("apiFetch", () => {
   beforeEach(() => {
@@ -65,5 +65,23 @@ describe("fetcher", () => {
     ) as unknown as typeof fetch;
 
     await expect(fetcher("https://api.example.com/x")).rejects.toThrow("API error 400");
+  });
+
+  it("throws ApiError carrying the status code", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response("nope", { status: 404 })
+    ) as unknown as typeof fetch;
+
+    await expect(fetcher("https://api.example.com/x")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
+  });
+
+  it("ApiError is an Error subclass (instanceof check for callers)", () => {
+    const err = new ApiError(500);
+    expect(err).toBeInstanceOf(Error);
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err.status).toBe(500);
   });
 });
