@@ -7,7 +7,8 @@ export async function apiFetch(
   init: RequestInit = {}
 ): Promise<Response> {
   const headers = new Headers(init.headers);
-  headers.set("X-Client-Id", getClientId());
+  const clientId = getClientId();
+  if (clientId) headers.set("X-Client-Id", clientId);
   return fetch(input, { ...init, headers });
 }
 
