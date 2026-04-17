@@ -20,6 +20,7 @@ const ViolationSchema = new Schema(
 const AuditSchema = new Schema(
   {
     publicId: { type: String, unique: true, index: true, required: true },
+    clientId: { type: String, index: true },
     url: { type: String, required: true, index: true },
     status: { type: String, enum: ["queued", "running", "done", "failed"], default: "queued" },
     score: Number,
