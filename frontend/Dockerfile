@@ -14,9 +14,15 @@ RUN npm run build
 FROM node:20-slim
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
+
+# Copy built artefacts with node:node ownership so the unprivileged user below
+# can read them. The node:*-slim base image ships a `node` user (UID 1000) for
+# exactly this use.
+COPY --from=builder --chown=node:node /app/.next ./.next
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/package.json ./package.json
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+
+USER node
 EXPOSE 3000
 CMD ["npm", "start"]
