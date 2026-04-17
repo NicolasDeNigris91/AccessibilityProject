@@ -59,10 +59,15 @@ export default function LandingPage() {
           {copy.landing.audiences.map((a) => (
             <div
               key={a.title}
-              className="flex flex-col gap-2 rounded border border-line/60 bg-surface p-6"
+              className="group flex flex-col overflow-hidden rounded border border-brand/70 bg-surface transition-colors duration-300 hover:border-brand"
             >
-              <h3 className="font-serif text-xl text-ink">{a.title}</h3>
-              <p className="text-sm text-ink/80">{a.body}</p>
+              <div className="h-px bg-gradient-to-r from-brand-hover via-brand to-transparent" />
+              <div className="flex flex-col gap-2 p-6">
+                <h3 className="font-serif text-xl text-ink transition-colors duration-300 group-hover:text-brand">
+                  {a.title}
+                </h3>
+                <p className="text-sm text-ink/80">{a.body}</p>
+              </div>
             </div>
           ))}
         </div>
