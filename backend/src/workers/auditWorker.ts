@@ -9,8 +9,7 @@ import { AuditModel } from "@/infrastructure/db/AuditModel";
 import { redisConnection } from "@/infrastructure/queue/connection";
 import { AUDIT_QUEUE, AuditJobData } from "@/infrastructure/queue/auditQueue";
 import { assertSafeUrl, isSyncSafeUrl } from "@/application/assertSafeUrl";
-import { calculateScore, countBySeverity } from "@/domain/scoring";
-import { Violation, WcagSeverity } from "@/domain/types";
+import { buildAuditResult, type AxeRawResult } from "@/domain/axeResult";
 
 // Must stay under Railway's default 30s SIGKILL window so cleanup (browser close,
 // mongoose disconnect) has room to run. Jobs that do not finish in time are
@@ -41,18 +40,6 @@ async function getBrowser(): Promise<Browser> {
     browser = null;
   });
   return browser;
-}
-
-interface AxeRaw {
-  violations: Array<{
-    id: string;
-    impact: WcagSeverity | null;
-    description: string;
-    helpUrl: string;
-    tags: string[];
-    nodes: Array<{ target: string[]; html: string; failureSummary?: string }>;
-  }>;
-  passes: unknown[];
 }
 
 async function runAudit(url: string) {
@@ -87,26 +74,10 @@ async function runAudit(url: string) {
     const raw = (await page.evaluate(async () => {
       // @ts-expect-error axe injected at runtime
       return await window.axe.run(document, { resultTypes: ["violations", "passes"] });
-    })) as AxeRaw;
-
-    const violations: Violation[] = raw.violations.map((v) => ({
-      id: v.id,
-      impact: (v.impact ?? "minor") as WcagSeverity,
-      description: v.description,
-      helpUrl: v.helpUrl,
-      tags: v.tags,
-      nodes: v.nodes.map((n) => ({
-        target: n.target,
-        html: n.html,
-        failureSummary: n.failureSummary,
-      })),
-    }));
+    })) as AxeRawResult;
 
     return {
-      score: calculateScore(violations),
-      totals: countBySeverity(violations),
-      violations,
-      passes: raw.passes.length,
+      ...buildAuditResult(raw),
       durationMs: Date.now() - start,
     };
   } finally {
