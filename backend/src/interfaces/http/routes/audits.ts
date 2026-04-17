@@ -40,7 +40,9 @@ const CreateAuditBody = z.object({
  *       202:
  *         description: Audit accepted and queued
  *       400:
- *         description: Invalid URL or missing client id
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 auditsRouter.post("/", requireClientId, async (req, res) => {
   const parsed = CreateAuditBody.safeParse(req.body);
@@ -81,8 +83,12 @@ auditsRouter.post("/", requireClientId, async (req, res) => {
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200: { description: Audit document }
- *       404: { description: Not found }
+ *       200:
+ *         description: Audit document
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 auditsRouter.get("/:publicId", async (req, res) => {
   const audit = await AuditModel.findOne({ publicId: req.params.publicId }).lean();
@@ -104,6 +110,10 @@ auditsRouter.get("/:publicId", async (req, res) => {
  *     responses:
  *       200:
  *         description: List of audit summaries (max 50, newest first, owned by this client)
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 auditsRouter.get("/", requireClientId, async (req, res) => {
   const items = await AuditModel.find({ clientId: req.clientId })
