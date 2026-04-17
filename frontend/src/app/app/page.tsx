@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
-import { API_URL, fetcher } from "@/lib/api";
+import { API_URL, apiFetch, fetcher } from "@/lib/api";
 import { copy } from "@/lib/copy";
 import type { AuditStatus, AuditSummary } from "@/lib/types";
 
@@ -30,7 +30,7 @@ export default function DashboardPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await fetch(`${API_URL}/api/audits`, {
+      await apiFetch(`${API_URL}/api/audits`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ url }),

@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { ReportHeader } from "@/components/report/ReportHeader";
 import { SeverityBreakdown } from "@/components/report/SeverityBreakdown";
 import { ViolationCard } from "@/components/report/ViolationCard";
-import { API_URL, fetcher } from "@/lib/api";
+import { API_URL, apiFetch, fetcher } from "@/lib/api";
 import { copy } from "@/lib/copy";
 import type { AuditDetail } from "@/lib/types";
 
@@ -41,7 +41,7 @@ export default function AuditDetailPage({ params }: { params: { id: string } }) 
   }
 
   async function reaudit() {
-    await fetch(`${API_URL}/api/audits`, {
+    await apiFetch(`${API_URL}/api/audits`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ url: data!.url }),
