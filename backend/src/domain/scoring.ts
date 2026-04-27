@@ -17,8 +17,8 @@ export function countBySeverity(violations: Violation[]): SeverityCounts {
 }
 
 /**
- * Compute a 0–100 accessibility score.
- * Pure function — fully unit-testable, no I/O.
+ * Compute a 0-100 accessibility score.
+ * Pure function, fully unit-testable, no I/O.
  */
 export function calculateScore(violations: Violation[]): number {
   let penalty = 0;

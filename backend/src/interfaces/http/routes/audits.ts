@@ -75,7 +75,7 @@ auditsRouter.post("/", requireClientId, async (req, res) => {
  * @openapi
  * /api/audits/{publicId}:
  *   get:
- *     summary: Get an audit by its public ID (public — shareable URL)
+ *     summary: Get an audit by its public ID (public, shareable URL)
  *     tags: [Audits]
  *     parameters:
  *       - in: path

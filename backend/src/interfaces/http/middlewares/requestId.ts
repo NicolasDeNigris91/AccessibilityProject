@@ -10,12 +10,8 @@ declare module "express-serve-static-core" {
 const HEADER = "x-request-id";
 const MAX_INCOMING_LENGTH = 100;
 
-/**
- * Tag every request with a stable id. Reuses a client-supplied X-Request-Id when
- * it is a reasonable length (defends against a client stuffing logs with MB-sized
- * values) and otherwise mints a fresh UUID. The same id is echoed back in the
- * response header so callers can correlate their own traces.
- */
+// Reuse a sane client-supplied X-Request-Id, otherwise mint one. Length cap
+// keeps a hostile client from filling logs with huge values.
 export const requestId: RequestHandler = (req, res, next) => {
   const incoming = req.header(HEADER);
   const id =

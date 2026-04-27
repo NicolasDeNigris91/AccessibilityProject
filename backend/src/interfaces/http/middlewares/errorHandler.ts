@@ -1,12 +1,7 @@
 import { ErrorRequestHandler } from "express";
 import { logger } from "@/config/logger";
 
-/**
- * Errors thrown in routes or middlewares. Carry a stable machine code (for the
- * API consumer to branch on) and an optional human-readable message. When the
- * message is not provided, the code doubles as the message, which is fine for
- * short codes like "not_found".
- */
+// Stable `code` for clients to branch on, optional human `message`.
 export class AppError extends Error {
   readonly status: number;
   readonly code: string;

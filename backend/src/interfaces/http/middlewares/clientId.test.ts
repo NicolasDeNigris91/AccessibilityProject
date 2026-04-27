@@ -13,7 +13,7 @@ function makeReq(headers: Record<string, string | undefined>): Request {
 describe("requireClientId", () => {
   const res = {} as Response;
 
-  it("assigns req.clientId and calls next with no error when a valid UUID header is present", () => {
+  it("sets req.clientId from a valid UUID header", () => {
     const id = "550e8400-e29b-41d4-a716-446655440000";
     const req = makeReq({ "x-client-id": id });
     const next = jest.fn() as unknown as NextFunction;
@@ -24,7 +24,7 @@ describe("requireClientId", () => {
     expect(next).toHaveBeenCalledWith();
   });
 
-  it("throws AppError(400) when the header is missing", () => {
+  it("throws 400 when header is missing", () => {
     const req = makeReq({});
     const next = jest.fn();
     expect(() => requireClientId(req, res, next as NextFunction)).toThrow(AppError);
@@ -33,7 +33,7 @@ describe("requireClientId", () => {
     );
   });
 
-  it("throws AppError(400) when the header is not a valid UUID", () => {
+  it("throws 400 when header is not a UUID", () => {
     const req = makeReq({ "x-client-id": "not-a-uuid" });
     const next = jest.fn();
     expect(() => requireClientId(req, res, next as NextFunction)).toThrow(AppError);

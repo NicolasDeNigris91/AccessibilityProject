@@ -29,7 +29,7 @@ describe("AuditDetailError (Next.js error boundary)", () => {
     expect(reset).toHaveBeenCalledTimes(1);
   });
 
-  it("logs the error to the console so it reaches ops tooling", () => {
+  it("logs the error to console", () => {
     const err = new Error("render blew up");
     render(<AuditDetailError error={err} reset={jest.fn()} />);
     expect(errSpy).toHaveBeenCalledWith("audit detail page crashed", err);

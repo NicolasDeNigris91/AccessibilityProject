@@ -19,7 +19,7 @@ export function AxeDev() {
         const axe = axeMod.default ?? axeMod;
         axe(React, ReactDOM, 1000);
       } catch {
-        // axe not installed — skip silently
+        // axe not installed, skip silently
       }
     })();
     return () => {

@@ -7,13 +7,7 @@ interface ApiErrorBody {
   requestId?: string;
 }
 
-/**
- * Thrown when the API responds with a non-2xx. Exposes the structured error
- * envelope the backend returns so callers can branch on `code` and show the
- * `requestId` to users for support. When the response is non-JSON (network
- * error, proxy returning HTML, etc.) the error still works with just `status`
- * and a fallback message.
- */
+// Thrown on any non-2xx. Carries the backend error envelope when present.
 export class ApiError extends Error {
   readonly status: number;
   readonly code?: string;
@@ -44,7 +38,7 @@ export const fetcher = async <T>(url: string): Promise<T> => {
     try {
       body = (await res.json()) as ApiErrorBody;
     } catch {
-      // Non-JSON error response (proxy, timeout, etc.) falls back to bare status.
+      // Non-JSON body, fall back to status only.
     }
     throw new ApiError(res.status, body);
   }

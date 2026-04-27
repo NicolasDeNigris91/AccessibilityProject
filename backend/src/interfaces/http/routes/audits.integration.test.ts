@@ -4,11 +4,8 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
-// Route integration tests against a real Mongoose connection backed by an
-// in-memory Mongo binary. Queue and safety-url modules stay mocked because
-// exercising them needs Redis and the network respectively; both have their
-// own unit tests. Everything else (schema, indexes, persistence) runs for
-// real so a broken Mongoose query would surface here.
+// Real Mongoose against an in-memory Mongo. Queue and safety-url stay mocked
+// (they need Redis / the network and have their own unit tests).
 
 jest.mock("@/infrastructure/queue/auditQueue", () => ({
   auditQueue: { add: jest.fn().mockResolvedValue(undefined) },
@@ -99,7 +96,7 @@ describe("GET /api/audits/:publicId (integration)", () => {
     });
   });
 
-  it("404s for an unknown publicId with the envelope shape", async () => {
+  it("returns 404 envelope for unknown publicId", async () => {
     const res = await request(buildApp()).get("/api/audits/does-not-exist");
     expect(res.status).toBe(404);
     expect(res.body).toMatchObject({
@@ -174,7 +171,7 @@ describe("GET /api/audits (integration)", () => {
     ]);
   });
 
-  it("caps results at 50 so a runaway client cannot pull the whole collection", async () => {
+  it("caps results at 50", async () => {
     const docs = Array.from({ length: 75 }, (_, i) => ({
       publicId: `id-${i}`,
       clientId: VALID_ID,

@@ -11,9 +11,7 @@ import { AUDIT_QUEUE, AuditJobData } from "@/infrastructure/queue/auditQueue";
 import { assertSafeUrl, isSyncSafeUrl } from "@/application/assertSafeUrl";
 import { buildAuditResult, type AxeRawResult } from "@/domain/axeResult";
 
-// Must stay under Railway's default 30s SIGKILL window so cleanup (browser close,
-// mongoose disconnect) has room to run. Jobs that do not finish in time are
-// force-closed; BullMQ re-queues them for the next worker to pick up.
+// Leave a few seconds for browser close + mongoose disconnect before SIGKILL.
 const SHUTDOWN_TIMEOUT_MS = 25_000;
 
 let browser: Browser | null = null;
@@ -36,7 +34,7 @@ async function getBrowser(): Promise<Browser> {
     ],
   });
   browser.on("disconnected", () => {
-    logger.warn("puppeteer disconnected — will relaunch on next job");
+    logger.warn("puppeteer disconnected, will relaunch on next job");
     browser = null;
   });
   return browser;
@@ -44,17 +42,14 @@ async function getBrowser(): Promise<Browser> {
 
 async function runAudit(url: string) {
   const start = Date.now();
-  // Re-check the target at execution time in case DNS resolution changed between
-  // intake and dequeue (short-window DNS rebinding).
+  // DNS could have changed since intake.
   await assertSafeUrl(url);
 
   const b = await getBrowser();
   const page = await b.newPage();
   try {
     await page.setViewport({ width: 1366, height: 900 });
-    // Block any subresource or redirect that tries to reach a literal private IP.
-    // DNS-name subresources are allowed through here; they are a known residual risk
-    // that would need a DNS-aware egress proxy to fully mitigate.
+    // Block subresources / redirects pointing at literal private IPs.
     await page.setRequestInterception(true);
     page.on("request", (request) => {
       const reqUrl = request.url();
@@ -93,8 +88,6 @@ async function main() {
     AUDIT_QUEUE,
     async (job) => {
       const { publicId, url, requestId } = job.data;
-      // Every log line for this job inherits requestId and publicId so an ops
-      // search on either field returns the full HTTP-to-worker timeline.
       const jobLogger = logger.child({
         requestId: requestId ?? "unknown",
         publicId,

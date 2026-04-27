@@ -70,7 +70,7 @@ describe("assertSafeUrl", () => {
       }
     );
 
-    it("blocks when any of several resolved addresses is private", async () => {
+    it("blocks if any resolved address is private", async () => {
       await expect(
         assertSafeUrl(
           "https://example.com",
@@ -79,7 +79,7 @@ describe("assertSafeUrl", () => {
       ).rejects.toMatchObject({ reason: "unsafe_target" });
     });
 
-    it("blocks a literal private IP embedded directly in the URL", async () => {
+    it("blocks a literal private IP in the URL", async () => {
       await expect(
         assertSafeUrl(
           "http://169.254.169.254/latest/meta-data",
@@ -89,7 +89,7 @@ describe("assertSafeUrl", () => {
     });
   });
 
-  it("returns an UnsafeUrlError instance (discriminable by callers)", async () => {
+  it("throws an UnsafeUrlError instance", async () => {
     try {
       await assertSafeUrl("ftp://example.com", publicResolver);
       fail("expected assertSafeUrl to throw");
@@ -101,7 +101,7 @@ describe("assertSafeUrl", () => {
 });
 
 describe("isSyncSafeUrl", () => {
-  it("allows a public-looking DNS hostname (deferred to async path)", () => {
+  it("allows a DNS hostname (checked async)", () => {
     expect(isSyncSafeUrl("https://example.com/page")).toBe(true);
   });
 

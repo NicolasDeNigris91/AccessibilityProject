@@ -27,15 +27,8 @@ function stripBrackets(host: string): string {
   return host.replace(/^\[|\]$/g, "");
 }
 
-/**
- * Assert that an audit URL is safe to open in a headless browser. Rejects non-http(s)
- * protocols, unresolvable hosts, and any URL whose hostname resolves (or literally
- * points) to a non-public IP range: loopback, RFC1918, link-local (cloud metadata),
- * multicast, broadcast, or any other reserved space.
- *
- * The DNS resolver is injected so tests can run without touching the network, and so
- * the worker can reuse the same policy before navigating.
- */
+// Resolver is injected so tests can run offline and the worker can reuse the
+// same policy before navigation.
 export async function assertSafeUrl(
   raw: string,
   resolver: DnsResolver = defaultResolver
@@ -74,12 +67,8 @@ export async function assertSafeUrl(
   }
 }
 
-/**
- * Synchronous companion used inside Puppeteer's request interceptor, which fires
- * for every subresource and every redirect target. A full DNS check per request is
- * too expensive, so this path only enforces protocol and blocks literal private-IP
- * hostnames. The async assertSafeUrl above covers DNS-resolved hostnames at intake.
- */
+// Sync version for the request interceptor. Per-request DNS would be too slow,
+// so this only catches literal private-IP hostnames.
 export function isSyncSafeUrl(raw: string): boolean {
   let url: URL;
   try {

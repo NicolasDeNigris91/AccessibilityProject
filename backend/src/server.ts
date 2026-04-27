@@ -20,9 +20,7 @@ async function main() {
 
   const app = express();
 
-  // Railway (and most PaaS) sit behind a reverse proxy — required so Express
-  // reads the real client IP from X-Forwarded-For (used by rate-limit) instead
-  // of treating every request as coming from the proxy's IP.
+  // Behind a reverse proxy, trust X-Forwarded-For so rate-limit sees the real client IP.
   if (env.TRUST_PROXY) app.set("trust proxy", 1);
 
   app.use(
@@ -33,7 +31,7 @@ async function main() {
   );
   app.use(
     helmet({
-      // Swagger UI needs inline styles/scripts; scoped CSP is configured per-route below.
+      // Swagger UI needs inline styles/scripts.
       contentSecurityPolicy: false,
     })
   );
@@ -42,8 +40,6 @@ async function main() {
   app.use(
     pinoHttp({
       logger,
-      // Have pino-http adopt the id our middleware assigned so every HTTP log
-      // line carries the same requestId the response header returns.
       genReqId: (req) => (req as { requestId?: string }).requestId ?? "unknown",
     })
   );

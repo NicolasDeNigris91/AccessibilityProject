@@ -13,7 +13,7 @@ coverage/
 # TypeScript incremental
 *.tsbuildinfo
 
-# Env files — never commit secrets
+# Env files (never commit secrets)
 .env
 .env.local
 .env.*.local
@@ -29,8 +29,9 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Internal agent working docs (plans, specs, scratch)
-docs/superpowers/
+# Local scratch notes
+*.local.md
+*.local/
 
 # Railway local
 .railway/
